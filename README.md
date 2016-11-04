@@ -1,7 +1,7 @@
 # SnakeGame
-Using a Neural Network to train a snake to play the snake game
+Using a Neural Network to train a snake to play the snake game. This project uses the Keras module for the construction of the Neural Netowork and PyGame to create the User Interface.
 
-# Keras: Deep Learning library for TensorFlow and Theano
+## Keras: Deep Learning library for TensorFlow and Theano
 
 Keras is a high-level neural networks library, written in Python and capable of running on top of either [TensorFlow](https://github.com/tensorflow/tensorflow) or [Theano](https://github.com/Theano/Theano). It was developed with a focus on enabling fast experimentation. *Being able to go from idea to result with the least possible delay is key to doing good research.*
 
