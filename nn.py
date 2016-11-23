@@ -1,6 +1,6 @@
 from keras.models import Sequential
 from keras.layers.core import Dense, Activation, Dropout
-from keras.optimizers import SGD
+from keras.optimizers import SGD, Adam
 from keras.callbacks import Callback
 import numpy as np
 
@@ -10,12 +10,13 @@ def neural_net(hiddenLayerDims, LoadWeights=''):
     neuralNet = Sequential()
 
     # create the dense input layer
-    neuralNet.add(Dense(hiddenLayerDims[0], input_shape=(4,), input_dim=4))
-    neuralNet.add(Activation('sigmoid'))
+    neuralNet.add(Dense(hiddenLayerDims[0], input_dim=4))
+    neuralNet.add(Activation('relu'))
 
     # create second layer (first hidden layer)
-    neuralNet.add(Dense(hiddenLayerDims[1]))
-    neuralNet.add(Activation('sigmoid'))
+    neuralNet.add(Dense(hiddenLayerDims[0]))
+    neuralNet.add(Activation('relu'))
+
 
     # create third and last layer
     neuralNet.add(Dense(4))
@@ -25,8 +26,9 @@ def neural_net(hiddenLayerDims, LoadWeights=''):
         neuralNet.load_weights(LoadWeights)
 
     # create the optimizer (Stochastic Gradient Descent)
-    sgd = SGD(lr=0.01, decay=0.0, momentum=0.0, nesterov=False)
+    sgd = SGD(lr=0.3, decay=1e-2, momentum=0.9, nesterov=True)
     # Use mean squared error loss and SGD as optimizer
-    neuralNet.compile(loss='mse', optimizer=sgd)
+    neuralNet.compile(loss='mean_squared_error', optimizer=sgd ,
+              metrics=['accuracy'])
 
     return neuralNet

@@ -6,12 +6,12 @@ import math as m
 
 class SnakeGame():
 
-	def __init__(self, epoch=10, batch_size=10, epsilon=1, gamma=.8):
+	def __init__(self, epoch=10, batch_size=10, epsilon=0.3, gamma=.8):
 		self.epoch = epoch
 		self.batch_size = batch_size
 		self.epsilon = epsilon
 		self.gamma = gamma
-		self.model = neural_net([15, 16])
+		self.model = neural_net([300, 300])
 		self.experience = []
 
 	# Check to see if there is a collision with a wall/apple/neither between two objects
@@ -47,7 +47,6 @@ class SnakeGame():
 		elif(dirs == 3):
 			newState[0] -= 20
 		return newState
-
 
 	def getState(self):
 		# print(self.xs[0], self.ys[0], self.applepos[0], self.applepos[1])
@@ -89,23 +88,24 @@ class SnakeGame():
 				return(True)
 			i-= 1
 		# collide with wall
-		if (SnakeX < 0 or SnakeX > 590 or SnakeY < 0 or SnakeY > 590):
+		if (SnakeX < 0 or SnakeX > 290 or SnakeY < 0 or SnakeY > 290):
 			return(True)
 		return False
 
 	def collectExperience(self, experience):
-		self.experience.append(experience)
+		if(experience not in self.experience):
+			self.experience.append(experience)
 
 	def playGame(self):
 		model = self.model
-		self.xs = [290, 290];
-		self.ys = [290, 290];
+		self.xs = [150, 150];
+		self.ys = [150, 150];
 		dirs = 0;
 		score = 0;
-		self.applepos = (random.randint(0, 590), random.randint(0, 590));
+		self.applepos = (random.randint(0, 290), random.randint(0, 290));
 		pygame.init();
-		screen=pygame.display.set_mode((600, 600));
-		pygame.display.set_caption('Snakes On The Plane');
+		screen=pygame.display.set_mode((300, 300));
+		pygame.display.set_caption('SnakeGame');
 		Snake = pygame.Surface((20, 20));
 		Snake.fill((0, 0, 0));
 		appleimage = pygame.Surface((10, 10));
@@ -114,9 +114,9 @@ class SnakeGame():
 		clock = pygame.time.Clock()
 
 		frame = 0
-		frameRate = 10
+		frameRate = 20
 		action = 0
-		while (frame < self.epoch):
+		while (True):
 			clock.tick(frameRate)
 
 			if(action == 2 and dirs != 0):
@@ -133,8 +133,8 @@ class SnakeGame():
 			        sys.exit(0)
 
 			# Decrease epsilon over the first half of training
-			if (self.epsilon > 0.1):
-				self.epsilon -= (0.9 / self.epoch)
+			# if (self.epsilon > 0.1):
+			# 	self.epsilon -= (0.9 / self.epoch)
 
 			# decide which direction the snake will go
 			if ((random.random() < self.epsilon) and (frame < self.batch_size)):
@@ -143,7 +143,6 @@ class SnakeGame():
 				# get action prediction from the model
 				state = np.array(self.getState())
 				prediction = model.predict(np.array([state])).flatten().tolist()
-				print(prediction)
 				action = prediction.index(max(prediction))
 
 			# get the reward for the action taken with the state
@@ -156,8 +155,8 @@ class SnakeGame():
 			newStatePrediction = model.predict(np.array([newState])).flatten().tolist()
 			predOutput[action] = reward
 			experience = [state, predOutput]
+
 			self.collectExperience(experience) # record experience
-			# print(self.experience)
 
 			# train nueral net on the experience collected
 			if(frame == self.batch_size):
@@ -169,7 +168,7 @@ class SnakeGame():
 					Ytrain.append(ele[1])
 
 				loss = model.fit(np.array(Xtrain), np.array(Ytrain),
-				batch_size=self.batch_size, nb_epoch=self.epoch)
+				batch_size=len(self.experience), nb_epoch=self.epoch)
 				# reset frames and expereince
 				frame = 0
 				self.experience = []
@@ -184,18 +183,18 @@ class SnakeGame():
 				i-= 1
 			if collided_w_itself:
 				#reset the game
-				self.xs = [290, 290];
-				self.ys = [290, 290];
+				self.xs = [150, 150];
+				self.ys = [150, 150];
 				score = 0;
 
 			# checks if snake collides with apple
-			if self.collide(self.xs[0], self.applepos[0], self.ys[0], self.applepos[1], 20, 10, 20, 10):score+=1;self.xs.append(700);self.ys.append(700);self.applepos=(random.randint(0,590),random.randint(0,590));
+			if self.collide(self.xs[0], self.applepos[0], self.ys[0], self.applepos[1], 20, 10, 20, 10):score+=1;self.xs.append(700);self.ys.append(700);self.applepos=(random.randint(0,290),random.randint(0,290));
 			# check if snake collides with wall
-			if (self.xs[0] < 0 or self.xs[0] > 590 or self.ys[0] < 0 or self.ys[0] > 590):
+			if (self.xs[0] < 0 or self.xs[0] > 290 or self.ys[0] < 0 or self.ys[0] > 290):
 				# die(screen, score)
 				# reset the game to beginning
-				self.xs = [290, 290];
-				self.ys = [290, 290];
+				self.xs = [150, 150];
+				self.ys = [150, 150];
 				score = 0;
 
 			i = len(self.xs)-1
@@ -221,5 +220,5 @@ class SnakeGame():
 			frame+=1
 
 if __name__ == '__main__':
-	SnakeGame = SnakeGame(100)
+	SnakeGame = SnakeGame(epoch=1)
 	SnakeGame.playGame()
