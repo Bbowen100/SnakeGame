@@ -10,25 +10,24 @@ def neural_net(hiddenLayerDims, LoadWeights=''):
     neuralNet = Sequential()
 
     # create the dense input layer
-    neuralNet.add(Dense(hiddenLayerDims[0], input_dim=4))
-    neuralNet.add(Activation('relu'))
+    neuralNet.add(Dense(hiddenLayerDims[0], input_dim=4, init='zero'))
+    neuralNet.add(Activation('sigmoid'))
 
-    # create second layer (first hidden layer)
-    neuralNet.add(Dense(hiddenLayerDims[0]))
-    neuralNet.add(Activation('relu'))
+    # hidden layers
+    neuralNet.add(Dense(hiddenLayerDims[1]))
+    neuralNet.add(Activation('sigmoid'))
 
-
-    # create third and last layer
+    # output layer
     neuralNet.add(Dense(4))
     neuralNet.add(Activation('softmax'))
 
-    if LoadWeights:
-        neuralNet.load_weights(LoadWeights)
+    # if LoadWeights:
+    #     neuralNet.load_weights(LoadWeights)
 
     # create the optimizer (Stochastic Gradient Descent)
     sgd = SGD(lr=0.3, decay=1e-2, momentum=0.9, nesterov=True)
     # Use mean squared error loss and SGD as optimizer
-    neuralNet.compile(loss='mean_squared_error', optimizer=sgd ,
+    neuralNet.compile(loss='binary_crossentropy', optimizer=sgd ,
               metrics=['accuracy'])
 
     return neuralNet

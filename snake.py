@@ -6,12 +6,12 @@ import math as m
 
 class SnakeGame():
 
-	def __init__(self, epoch=10, batch_size=10, epsilon=0.3, gamma=.8):
+	def __init__(self, epoch=10, batch_size=10, epsilon=0.5, gamma=.8):
 		self.epoch = epoch
 		self.batch_size = batch_size
 		self.epsilon = epsilon
 		self.gamma = gamma
-		self.model = neural_net([300, 300])
+		self.model = neural_net([10,15])
 		self.experience = []
 
 	# Check to see if there is a collision with a wall/apple/neither between two objects
@@ -62,20 +62,20 @@ class SnakeGame():
 		newState = self.getNewState(oldState, action, dirs)
 		# -500 for restarting the game
 		if(self.collide_self_wall(newState)):
-			return -500
+			return -1
 		# reward +10 if snake is closer to apple, -10 if snake is farther
 		# and +100 if the snake gets the apple
 		oldDistance = self.distance(oldState)
 		newDistance = self.distance(newState)
 		if(oldDistance > newDistance):
 			if(newDistance == 0):
-				return 100
+				return 1
 			else:
-				return 10
+				return 1
 		elif(oldDistance < newDistance):
-			return -10
+			return -1
 		else:
-			return 0 # same spot: Unlikely but for debugging purposes
+			return -1 # same spot: Unlikely but for debugging purposes
 
 	def collide_self_wall(self, state):
 		SnakeX = state[0]
@@ -137,7 +137,8 @@ class SnakeGame():
 			# 	self.epsilon -= (0.9 / self.epoch)
 
 			# decide which direction the snake will go
-			if ((random.random() < self.epsilon) and (frame < self.batch_size)):
+			# if ((random.random() < self.epsilon) and (frame < self.batch_size)):
+			if (random.random() < self.epsilon):
 				action = random.choice([0,1,2,3]) #take a random direction
 			else:
 				# get action prediction from the model
@@ -159,7 +160,8 @@ class SnakeGame():
 			self.collectExperience(experience) # record experience
 
 			# train nueral net on the experience collected
-			if(frame == self.batch_size):
+			# if(len(self.experience) == self.batch_size):
+			if(len(self.experience) == 100):
 				# get training set from experience
 				Xtrain = [];Ytrain = [];
 				loss = 0
@@ -167,11 +169,12 @@ class SnakeGame():
 					Xtrain.append(ele[0])
 					Ytrain.append(ele[1])
 
-				loss = model.fit(np.array(Xtrain), np.array(Ytrain),
-				batch_size=len(self.experience), nb_epoch=self.epoch)
+				print('about to train on the batch')
+				loss = model.train_on_batch(np.array(Xtrain), np.array(Ytrain))
 				# reset frames and expereince
 				frame = 0
-				self.experience = []
+				self.epsilon -= 0.1
+				# self.experience = []
 
 			# checks if snake collides with itself
 			i = len(self.xs)-1
@@ -220,5 +223,5 @@ class SnakeGame():
 			frame+=1
 
 if __name__ == '__main__':
-	SnakeGame = SnakeGame(epoch=1)
+	SnakeGame = SnakeGame()
 	SnakeGame.playGame()
